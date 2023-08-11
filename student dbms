@@ -1,0 +1,240 @@
+#****************************************************
+# **** StudentManagementSystem **** #****************************************************
+#Adding one Student record
+def Add_Stu_Details(): try:
+adno1=input("Enter Admission No : ")
+sname1=input("Enter Student Name : ")
+eng1=int(input("Enter English marks : "))
+lang1=int(input("Enter II Language marks : ")) maths1=int(input("Enter Maths marks : "))
+sci1=int(input("Enter Science marks : ")) social1=int(input("Enter Social Science marks : ")) group1=input("Enter Preferred group by student IA/IB/IC/IIA : ") phone1=input("Enter Phone No. of the student : ") total_mark=int(eng1+lang1+maths1+sci1+social1) grp_all=Group_Allotment(total_mark,maths1,sci1,group1)
+Query=("INSERT INTO student (adno,sname,eng,lang,maths,sci,social,grp_pref,total_marks,allot_grp,phone)" "values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);")
+Record=(adno1,sname1,eng1,lang1,maths1,sci1,social1,group1,total_mark,grp_all,phone1) MyCur.execute(Query,Record)
+print(MyCur.rowcount, "Record inserted in student Table successfully")
+except mysql.connector.Error as err: print("Unable to add the record") print("Error Code:", err.errno) print("SQLSTATE", err.sqlstate) print("Message", err.msg)
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Displaying All the Student records
+def Show_Stu_Details(): try:
+Query= ("SELECT * FROM student;")
+MyCur.execute(Query)
+print ("Adno\tName\tEng\tIILang\tMaths\tSci\tSoc\tGrp_Pref\tTotal\tGrpAllot\tPhone\t\n") for(adno,sname,eng,lang,maths,sci,social,grp_pref,total_marks,allot_grp,phone) in MyCur:
+print(adno ,end="\t") print(sname,end="\t") print(eng,end="\t") print(lang,end="\t") print(maths,end="\t") print(sci,end="\t") print(social,end="\t") print(grp_pref,end="\t") print(total_marks,end="\t") print(allot_grp,end="\t") print(phone,end="\n")
+print("Total number of records: ",MyCur.rowcount)
+except mysql.connector.Error as err: print("Unable to show student details") print("Error Code:", err.errno) print("SQLSTATE", err.sqlstate) print("Message", err.msg)
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Searching for a particular student record
+def Search_Stu_Details(): try:
+found=0
+temp_adno=input("Enter Admission Number to be Searched :")
+Query= ("SELECT * FROM student WHERE adno= %s") rec_srch=(temp_adno,)
+MyCur.execute(Query,rec_srch)
+for(adno,sname,eng,lang,maths,sci,social,grp_pref,total_marks,allot_grp,phone) in MyCur: print ("Adno\tName\tEng\tIILang\tMaths\tSci\tSoc\tGrp_Pref\tTotal\tGrpAllot\tPhone\t") print(adno ,end="\t")
+print(sname,end="\t")
+print(eng,end="\t") print(lang,end="\t") print(maths,end="\t") print(sci,end="\t") print(social,end="\t") print(grp_pref,end="\t")
+print(total_marks,end="\t") print(allot_grp,end="\t") print(phone,end="\t") found=1
+if (found==0):
+print ("Record not found")
+except mysql.connector.Error as err: print("Unable to search student details") print("Error Code:", err.errno) print("SQLSTATE", err.sqlstate) print("Message", err.msg)
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Updating a student record based on Admission number
+def Update_Stu_Details(): try:
+found = 0
+temp_adno=input("Enter Admission Number to be Updated: ")
+Query= (" SELECT * FROM student WHERE adno= %s;") rec_srch=(temp_adno,)
+MyCur.execute(Query,rec_srch)
+for(adno) in MyCur:
+print("Input New Data ")
+sname1=input("Enter Student Name : ")
+eng1=int(input("Enter English marks : "))
+lang1=int(input("Enter II Language marks : ")) maths1=int(input("Enter Maths marks : "))
+sci1=int(input("Enter Science marks : ")) social1=int(input("Enter Social Science marks : ")) group1=input("Enter Preferred group by student IA/IB/IC/IIA : ") phone1=input("Enter Phone No. of the student : ")
+total_marks=eng1+lang1+maths1+sci1+social1 grp_all=Group_Allotment(total_marks,maths1,sci1,group1)
+Q=("UPDATE student SET sname=%s,eng=%s,lang=%s,maths=%s," "sci=%s,social=%s,grp_pref=%s,total_marks=%s,allot_grp=%s,phone=%s WHERE adno=%s;")
+D=(sname1,eng1,lang1,maths1,sci1,social1,group1,total_marks,grp_all,phone1,rec_srch[0])
+MyCur.execute(Q,D)
+print("Record has been updated in student table") found=1
+if (found==0):
+print("Record not found")
+except mysql.connector.Error as err: print("Unable to update student details") print("Error Code:", err.errno) print("SQLSTATE", err.sqlstate) print("Message", err.msg)
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Deleting all records or a particular record based on admission number
+def Del_Stu_Details(): try:
+ch=input("Do you want to delete all records y/n: ") if (ch.lower() == 'y'):
+Q= ("TRUNCATE TABLE student ;") MyCur.execute(Q)
+mycon.commit()
+else: found=0
+temp_adno=input("Enter Admission Number to be Deleted :") Query= (" SELECT * FROM student WHERE adno= %s;") rec_srch=(temp_adno,)
+MyCur.execute(Query,rec_srch)
+for(adno) in MyCur: found=1
+Q= (" DELETE FROM student where adno= %s;") MyCur.execute(Q,rec_srch)
+mycon.commit()
+print("Record has been deleted from student table ")
+if (found==0):
+print("Record not found")
+except mysql.connector.Error as err: print("Unable to delete student record") print("Error Code:", err.errno) print("SQLSTATE", err.sqlstate)
+ print("Message", err.msg)
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Option for Student records
+def Student_Menu(): while True:
+print("\n\t\t****STUDENT MENU ****") print("\t\t----------------------------------------------------") print("1 : Add Student Details ")
+print("2 : Show Student Details")
+print("3 : Search Student Details ")
+print("4 : Update Student Details")
+print("5 : Delete Student Details")
+print("6 : Return to MAIN MENU...") print("\t\t----------------------------------------------------") choice=int(input("Enter Your Choice 1-6 :"))
+if choice==1: Add_Stu_Details()
+elif choice==2: Show_Stu_Details()
+elif choice==3: Search_Stu_Details()
+elif choice==4: Update_Stu_Details()
+elif choice==5: Del_Stu_Details()
+elif choice==6: return
+else:
+print("!!!!!Error : Invalid Choice try again....!!!!!") conti=input("Press any key return to Continue..")
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Displaying group allotment for students
+def Show_Group_Allotment(): try:
+Query= ("SELECT * FROM student;") MyCur.execute(Query)
+print ("Adno\tName\tTotal_marks\tPref_grp\t\tGrp_Allot\t") data=MyCur.fetchall()
+for rec in data: print(rec[0],end="\t") print(rec[1],end="\t\t") print(rec[8],end="\t\t") print(rec[7],end="\t\t") print(rec[9],end="\t\t\n")
+except mysql.connector.Error as err: print("Unable to show group for students") print("Error Code:", err.errno) print("SQLSTATE", err.sqlstate) print("Message", err.msg)
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Displaying Admission criteria
+def Show_Adm_Criteria():
+print ("\nAdmission for students")
+print ("Group\tGroup_Sub\tCutoff\tMaths\tScience\t")
+print ("IA\tMaths_Bio\t>=%s\t>=%s\t>=%s\t" % (cutoff, math_cutoff,sci_cutoff)) print ("IB\tMaths_CS\t>=%s\t>=%s\t>=%s\t" % (cutoff, math_cutoff,sci_cutoff)) print ("IC\tPure_sci\t>=%s\t---\t>=%s\t" % (cutoff, sci_cutoff))
+print ("IIA\tCommerce\t>=%s\t>=%s\t---\t" % (cutoff, math_cutoff))
+print ("NA\tNo_Admission\t<%s\t---\t---\t" % (cutoff))
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Modifying admisssion criteria
+def Modify_Adm_Criteria():
+global cutoff
+global math_cutoff
+global sci_cutoff
+cutoff=int(input("Enter the cut_off value: ")) math_cutoff=int(input("Enter the Maths cut_off value: ")) sci_cutoff=int(input("Enter the Sci cut_off value: "))
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Menu for Admission
+def Admission_Menu(): while True:
+print("\n\t\t**** ADMISSION MENU ****")
+                                                                       
+ STUDENT DATABASE MANAGEMENT SYSTEM
+ print("\t\t--------------------------------------------------------") print("1 : Show Student Group Allotment ")
+print("2 : Show Admission Criteria")
+print("3 : Modify Admission Criteria ")
+print("4 : Return to MAIN MENU...") print("\t\t--------------------------------------------------------") choice=int(input("Enter Your Choice 1-4 :"))
+if choice==1: Show_Group_Allotment()
+elif choice==2: Show_Adm_Criteria()
+elif choice==3: Modify_Adm_Criteria()
+elif choice==4: return
+else:
+print("!!!!!Error : Invalid Choice try again....!!!!!") conti=input("Press any key return to Continue..")
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Allotment of group based on cutoff marks
+def Group_Allotment(tot_mark,math,sci,pref): global cutoff
+global math_cutoff
+global sci_cutoff
+if (pref=="IA") or (pref=="IB"):
+if (tot_mark>=cutoff) and (math>=math_cutoff) and (sci>=sci_cutoff):
+return (pref)
+elif (tot_mark>=cutoff) and (sci>=sci_cutoff):
+return ("IC")
+elif (tot_mark>=cutoff) and (math>=math_cutoff):
+return ("IIA") else:
+return ("NA") elif (pref=="IC"):
+if (tot_mark>=cutoff) and (sci>=sci_cutoff): return (pref)
+elif (tot_mark>=cutoff) and (math>=math_cutoff): return ("IIA")
+else:
+return ("NA")
+elif (pref=="IIA"):
+if (tot_mark>=cutoff) and (math>=math_cutoff):
+return (pref) else:
+return ("NA")
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Displaying school toppers (top 3 ranks)
+def Show_School_Toppers(): try:
+Query= ("SELECT adno, sname, total_marks,"
+"FIND_IN_SET(total_marks,(SELECT GROUP_CONCAT(DISTINCT total_marks "
+"ORDER BY total_marks DESC) FROM student)) as srank FROM student ORDER BY srank;") MyCur.execute(Query)
+print("\n\t School Toppers")
+print ("Rank\tAdno\tName\t\tTotal\t") for(adno,sname,total_marks,srank) in MyCur:
+if (srank <=3): print(srank,end="\t") print(adno ,end="\t") print(sname,end="\t\t") print(total_marks,end="\t\n")
+except mysql.connector.Error as err: print("Unable to show school toppers") print("Error Code:", err.errno) print("SQLSTATE", err.sqlstate) print("Message", err.msg)
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Displaying subject toppers (top 3 marks) based on used selection
+def Show_Subject_Toppers(): while True:
+try:
+print("\n\t\t**** SUBJECT-TOPPERS MENU ****") print("\t\t------------------------------------------------------------------------") print("1 : English")
+print("2 : II Language")
+print("3 : Maths")
+print("4 : Science")
+print("5 : Social Science")
+                                                                        
+print("6 : Return to MAIN MENU...") print("\t\t-----------------------------------------------------------------------") choice=int(input("Enter Your Choice 1-6 :"))
+if choice == 1:
+Query= ("SELECT adno, sname, eng,"
+"FIND_IN_SET(eng,(SELECT GROUP_CONCAT(DISTINCT eng "
+"ORDER BY eng DESC) FROM student)) as srank FROM student ORDER BY srank;")
+MyCur.execute(Query)
+print("\n\t English Toppers")
+print ("Rank\tAdno\tName\t\tEng Marks\t") for(adno,sname,eng,srank) in MyCur:
+if (srank <=3): print(srank,end="\t") print(adno ,end="\t") print(sname,end="\t\t") print(eng,end="\t\n")
+if choice == 2:
+Query= ("SELECT adno, sname, lang,"
+"FIND_IN_SET(lang,(SELECT GROUP_CONCAT(DISTINCT lang "
+"ORDER BY lang DESC) FROM student)) as srank FROM student ORDER BY srank;")
+MyCur.execute(Query)
+print("\n\t Language Toppers")
+print ("Rank\tAdno\tName\t\tLang Marks\t") for(adno,sname,lang,srank) in MyCur:
+if (srank <=3): print(srank,end="\t") print(adno ,end="\t") print(sname,end="\t\t") print(lang,end="\t\n")
+if choice == 3:
+Query= ("SELECT adno, sname, maths,"
+"FIND_IN_SET(maths,(SELECT GROUP_CONCAT(DISTINCT maths "
+"ORDER BY maths DESC) FROM student)) as srank FROM student ORDER BY srank;")
+MyCur.execute(Query)
+print("\n\t Math Toppers")
+print ("Rank\tAdno\tName\t\tMaths Marks\t") for(adno,sname,maths,srank) in MyCur:
+if (srank <=3): print(srank,end="\t") print(adno ,end="\t") print(sname,end="\t\t") print(maths,end="\t\n")
+if choice == 4:
+Query= ("SELECT adno, sname, sci,"
+"FIND_IN_SET(sci,(SELECT GROUP_CONCAT(DISTINCT sci "
+"ORDER BY sci DESC) FROM student)) as srank FROM student ORDER BY srank;")
+MyCur.execute(Query)
+print("\n\t Science Toppers")
+print ("Rank\tAdno\tName\t\tScience Marks\t") for(adno,sname,sci,srank) in MyCur:
+if (srank <=3): print(srank,end="\t") print(adno ,end="\t") print(sname,end="\t\t") print(sci,end="\t\n")
+if choice == 5:
+Query= ("SELECT adno, sname, social,"
+"FIND_IN_SET(social,(SELECT GROUP_CONCAT(DISTINCT social "
+"ORDER BY social DESC) FROM student)) as srank FROM student ORDER BY srank;")
+MyCur.execute(Query)
+print("\n\t Social Science Toppers")
+print ("Rank\tAdno\tName\t\tSocial Marks\t") for(adno,sname,social,srank) in MyCur:
+if (srank <=3): print(srank,end="\t") print(adno ,end="\t") print(sname,end="\t\t") print(social,end="\t\n")
+elif choice==6: return
+elif choice >6:
+print("!!!!!Error : Invalid Choice try again....!!!!!") conti=input("Press any key return to Continue..")
+except mysql.connector.Error as err: print("Unable to show subject toppers") print("Error Code:", err.errno) print("SQLSTATE", err.sqlstate) print("Message", err.msg)
+                                                                                
+ #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #Menu for Toppers list
+def Toppers_Menu(): while True:
+print("\n\t\t**** TOPPERS MENU ****") print("\t\t----------------------------------------------------") print("1 : Show School Toppers ")
+print("2 : Show Subject Toppers")
+print("3 : Return to MAIN MENU...") print("\t\t----------------------------------------------------") choice=int(input("Enter Your Choice 1-3 :"))
+if choice==1: Show_School_Toppers()
+elif choice==2: Show_Subject_Toppers()
+elif choice==3: return
+else:
+print("!!!!!Error : Invalid Choice try again....!!!!!") conti=input("Press any key return to Continue..")
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #*******main program*******
+import datetime
+import mysql.connector
+from mysql.connector import errorcode from mysql.connector import(connection) cutoff=400
+math_cutoff=85
+sci_cutoff=85
+mydb = mysql.connector.connect(
+host='localhost', user='root', password=''
+)
+MyCur = mydb.cursor()
+MyCur.execute("CREATE DATABASE IF NOT EXISTS studentmgm;") MyCur.execute("USE studentmgm;")
+MyCur.execute("CREATE TABLE IF NOT EXISTS student (adno VARCHAR(20) PRIMARY KEY," "sname VARCHAR(40),eng INT,lang INT,maths INT,sci INT,social INT,grp_pref VARCHAR (3)," "total_marks INT,allot_grp VARCHAR(3),phone VARCHAR(15));")
+print("\n")
+today = datetime.datetime.today() print(f"{today:%B %d, %Y}")
+while True: print("\t\t----------------------------------------------------------------------") print("\t\t* * * * Welcome to Student Management Program * * * *") print("\t\t----------------------------------------------------------------------") print("\n\t\t****ABCSchool-MAIN MENU ****") print("1 : Student Details")
+print("2 : Toppers List")
+print("3 : Admission Process")
+print("4 : Exit") print("\t\t----------------------------------------------------------------------")
+choice=int(input("Enter Your Choice : "))
+if choice==1: Student_Menu()
+elif choice==2: Toppers_Menu()
+elif choice==3: Admission_Menu()
+elif choice==4: break
+else:
+print("!!!!!Error : Invalid Choice try again....!!!!!") key=input("Press any key to continue...")
+MyCur.close()
